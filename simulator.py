@@ -209,7 +209,7 @@ def collision_check(r1 : Rocket, r2 : Rocket, dt : float) -> bool:
 def grav_check(r1 : Rocket, r2 : Rocket, dt : float) -> None:
     if r1 is r2:
         return
-    dir_vec = r2.get_loc_vector() - r1.get_loc_vector() # points from r1 to r2
+    dir_vec = r2.get_loc_vector() - r1.get_loc_vector() # dir vector from r1 to r2
     dir_vec = dir_vec / abs(dir_vec)
     d = abs(r1.get_loc_vector() - r2.get_loc_vector())
     delta_v = dir_vec * r2.get_mass() * dt / d**2
