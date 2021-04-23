@@ -52,9 +52,8 @@ if __name__ == "__main__":
     rockets = [sim.Rocket(sim.Vector(random.randint(0, WIDTH), random.randint(0, HEIGHT)), sim.Vector(0, 0), random.randint(RADIUS_MIN, RADIUS_MAX+1), WIDTH, HEIGHT, BALL_COLORS[random.randrange(len(BALL_COLORS))]) for _ in range(INIT_NUM_ROCKETS)]
 
     mouse_pos = None
-
-    fuel = False
-    attract = None
+    prev_mouse_pos = None # mouse position at last dt
+    left_click_down = True
 
     # init font for putting down text
     pygame.font.init()
@@ -63,15 +62,9 @@ if __name__ == "__main__":
     # -------- Main Program Loop -----------
     while carryOn:
         # --- Main event loop ---
-        for event in pygame.event.get(): 
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 carryOn = False
-            elif event.type == pygame.MOUSEBUTTONDOWN: # once mouse is down, fueling starts (rocket accelerates toward mouse)
-                mouse_state = pygame.mouse.get_pressed() # tuple
-                fuel = not mouse_state[1] # fuel up if either left or right button is pressed (not middle mouse button)
-                attract = mouse_state[0] # attract if left button is pressed
-            elif event.type == pygame.MOUSEBUTTONUP: # once mouse is back up, fueling stops
-                fuel = False
             elif event.type == pygame.KEYDOWN:
                 print("Adding rocket...")
                 mouse_pos = pygame.mouse.get_pos()
@@ -88,27 +81,50 @@ if __name__ == "__main__":
         textsurface = myfont.render(f"paricles generated: {len(rockets)}", False, BLACK)
         screen.blit(textsurface, (0, 0))
 
+        # handle dragging variables for the loop
+        prev_mouse_pos = mouse_pos
+        mouse_pos = sim.Vector().setvals(pygame.mouse.get_pos())
+
+        if prev_mouse_pos is None:
+            prev_mouse_pos = mouse_pos
+
+        # loop through all combinations of rockets
         for rocket in rockets:
-            for other_rocket in rockets:
-                if rocket is other_rocket:
-                    continue
+            if pygame.mouse.get_pressed()[0] and rocket.surrounds(mouse_pos): # if left-click is being pressed and curosr is inside rocket
+                # rocket is being dragged:
+                delta_mouse = mouse_pos - prev_mouse_pos
+                rocket.add_loc(delta_mouse)
+                rocket.update_vel(delta_mouse * 10) # set velocity to how fast / where mouse is moving
+            
+            elif pygame.mouse.get_pressed()[2] and rocket.surrounds(mouse_pos): # if right-click is being pressed and cursor is inside rocket
+                # delete rocket
+                rockets.remove(rocket)
 
-                if not sim.collision_check(rocket, other_rocket, dt): # apply collision
-                    sim.grav_check(rocket, other_rocket, dt) # apply gravity if these two objects did not collide so that the objects are not forced into each other
-                
+            else:
+                # rocket not being dragged, so apply the regular physics
 
-            #rocket.add_vel(sim.Vector(0, GRAV_DELTA_V)) # gravity
-            #rocket.apply_friction()
+                # apply collision and gravity in relation to other rockets on screen
+                for other_rocket in rockets:
+                    if rocket is other_rocket:
+                        continue
 
-            if fuel:
-                # calculate vector from mouse_pos to rocket:
-                mouse_pos = pygame.mouse.get_pos()
-                delta_vel = sim.Vector().setvals(mouse_pos) - rocket.get_loc_vector()
-                delta_vel = delta_vel / abs(delta_vel) * 100
-                delta_vel = delta_vel * (1 if attract else -1)
-                rocket.add_vel(delta_vel) # adding velocity; hence, accelerating (dv/dt =/= 0)
+                    if not sim.collision_check(rocket, other_rocket, dt): # apply collision
+                        sim.grav_check(rocket, other_rocket, dt) # apply gravity if these two objects did not collide so that the objects are not forced into each other
+                    
 
-            rocket.update_loc(dt)
+                #rocket.add_vel(sim.Vector(0, GRAV_DELTA_V)) # gravity
+                #rocket.apply_friction()
+
+                #if fuel:
+                    # calculate vector from mouse_pos to rocket:
+                    #mouse_pos = pygame.mouse.get_pos()
+                    #delta_vel = sim.Vector().setvals(mouse_pos) - rocket.get_loc_vector()
+                    #delta_vel = delta_vel / abs(delta_vel) * 100
+                    #delta_vel = delta_vel * (1 if attract else -1)
+                    #rocket.add_vel(delta_vel) # adding velocity; hence, accelerating (dv/dt =/= 0)
+
+                rocket.update_loc(dt)
+
             draw_rocket(screen, rocket)
  
         # update screen

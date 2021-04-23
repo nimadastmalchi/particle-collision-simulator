@@ -22,7 +22,7 @@ class Vector:
 
     def distance(self, other) -> float:
         if isinstance(other, self.__class__):
-            return abs(self - other) # BUG not correct
+            return abs(self - other)
         else:
             raise TypeError(f"unsupported operand type(s) for distance: {self.__class__} and {type(other)}")
 
@@ -120,6 +120,12 @@ class Rocket:
     def apply_friction(self) -> None:
         self.vel = self.vel * 0.99
 
+    def surrounds(self, point : Vector) -> bool:
+        return self.pos.distance(point) < self.radius
+
+    def add_loc(self, delta_pos : Vector) -> None:
+        self.pos = self.pos + delta_pos
+
     def update_loc(self, dt : float) -> None:
         self.t += dt
         self.pos = self.pos + self.vel * dt
@@ -207,7 +213,7 @@ def grav_check(r1 : Rocket, r2 : Rocket, dt : float) -> None:
     dir_vec = dir_vec / abs(dir_vec)
     d = abs(r1.get_loc_vector() - r2.get_loc_vector())
     delta_v = dir_vec * r2.get_mass() * dt / d**2
-    r1.add_vel(delta_v * 1000)
+    r1.add_vel(delta_v * 10000)
     r1.update_loc(dt)
 
 if __name__ == "__main__":
