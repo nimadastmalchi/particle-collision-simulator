@@ -163,7 +163,6 @@ def collision_check2(this : Rocket, rockets : [], dt : float) -> None:
         x10 = this.get_loc_vector()
         x20 = other.get_loc_vector()
         if x10.distance(x20) <= this.get_rad() + other.get_rad() and abs(x20 - x10) != 0: #TODO: change to distancesquared to optimize
-            print("Collision")
             v10 = this.get_vel()
             v20 = other.get_vel()
             m1 = this.get_mass()
@@ -186,7 +185,6 @@ def collision_check(r1 : Rocket, r2 : Rocket, dt : float) -> bool:
     x10 = r1.get_loc_vector()
     x20 = r2.get_loc_vector()
     if x10.distance(x20) <= r1.get_rad() + r2.get_rad(): #TODO: change to distancesquared to optimize
-        print("Collision")
         v10 = r1.get_vel()
         v20 = r2.get_vel()
         m1 = r1.get_mass()

@@ -23,14 +23,14 @@ HEIGHT = 800
 
 GRAV_DELTA_V = 10
 
-REFRESH_RATE = 60
+REFRESH_RATE = 244
 
 RADIUS_MIN = 10
 RADIUS_MAX = 60
 
 INIT_NUM_ROCKETS = 1
 
-dt = 1 / 60
+dt = 1 / REFRESH_RATE
 
 def draw_rocket(screen, r : sim.Rocket):
     loc_tuple = r.get_loc_tuple()
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 print("Adding rocket...")
                 mouse_pos = pygame.mouse.get_pos()
                 init_loc = sim.Vector(WIDTH / 2, HEIGHT / 2)
-                init_vel = sim.Vector(0, 0).setvals(mouse_pos) - init_loc
+                init_vel = (sim.Vector(0, 0).setvals(mouse_pos) - init_loc) / 1000
                 init_vel = init_vel
                 rocket = sim.Rocket(init_loc, init_vel, random.randint(RADIUS_MIN, RADIUS_MAX+1), WIDTH, HEIGHT, BALL_COLORS[random.randrange(len(BALL_COLORS))])
                 rockets.append(rocket)
